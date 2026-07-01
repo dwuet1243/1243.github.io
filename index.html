@@ -238,23 +238,30 @@
 
         if(action === 'create' && (!data.date || !data.workContent)) return alert("請填寫必填欄位");
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' } // 避免 CORS preflight 錯誤
-        })
-        .then(response => response.json())
-        .then(result => {
-            if(result.status === "success") {
-                alert(`操作成功：${action}`);
-                if(action === 'create' || action === 'delete') document.getElementById('maintenanceForm').reset();
-            } else {
-                alert("操作失敗，請重試");
-            }
-        })
-        .catch(error => alert('連線錯誤: ' + error));
+        // 原本的程式碼找這段：
+fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    redirect: 'follow' // <--- 請補上這一行
+})
+.then(response => response.text()) // <--- 先改成 text() 來攔截看看真正回傳了什麼
+.then(text => {
+    try {
+        const result = JSON.parse(text); // 嘗試解析 JSON
+        if(result.status === "success") {
+            alert(`操作成功：${action}`);
+            if(action === 'create' || action === 'delete') document.getElementById('maintenanceForm').reset();
+        } else {
+            alert("操作失敗，請重試");
+        }
+    } catch (e) {
+        // 如果還是出錯，把 Google 真實回傳的東西印在終端機或警告視窗，方便抓錯
+        console.error("後端回傳了非 JSON 格式的內容：", text);
+        alert("連線錯誤，後端回傳了非預期的資料格式。請按 F12 查看 Console。");
     }
-
+})
+.catch(error => alert('連線錯誤: ' + error));
     // 簡易查詢邏輯示範 (以日期查詢為例)
     function queryData() {
         const queryDate = document.getElementById('date').value;
