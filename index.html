@@ -197,7 +197,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3WgcD2dsdO00NC3cVMQ3IA83_1wqmEnfnlWC_izIMHzPQroCxynTSAcvQMNah_BlUPw/exec";
     let currentUserEmail = "";
 
-    // 處理 Google 登入回傳
+    // 處理 Google 登入回傳資料
     function handleCredentialResponse(response) {
         const responsePayload = decodeJwtResponse(response.credential);
         currentUserEmail = responsePayload.email;
